@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "336545282851",
+    "project_id": "spaza-4a28b",
+    "storage_bucket": "spaza-4a28b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336545282851:android:d2f898902e85ad75eb2a96",
+        "android_client_info": {
+          "package_name": "app.web.amstyles.spaza"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjqHEsdXcu0s7VV_x9-BpQDd4skDE3NCc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
