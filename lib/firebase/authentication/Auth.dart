@@ -1,6 +1,11 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spaza/firebase/database/database.dart';
+import 'package:spaza/models/local_user.dart';
+import 'package:spaza/pages/home_page.dart';
+import 'package:spaza/providers/userProvider.dart';
 import 'package:spaza/widgets/blob_loader.dart';
 
 class Auth{
@@ -69,35 +74,35 @@ class Auth{
   }
 
 
-//   static Future<void> signInWithEmail (String email, String password, BuildContext context)async{
+  static Future<void> signInWithEmail (String email, String password, BuildContext context)async{
 
-//     final _auth = FirebaseAuth.instance;
-//     showDialog(context: context, builder: (context) => BlobLoader('Signing in...'),);
-//     try {
-//       await _auth.signInWithEmailAndPassword(email: email, password: password);
-//       localUser.User mUser = await Database.getUser(email);
-//       await LocalStorage.writeUserToLocalStorage(mUser);
-//       Provider.of<UserProvider>(context, listen: false).setUser(mUser);
-//       Navigator.pop(context);
-//       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-//     }
-//      on FirebaseAuthException catch (e){
-//       Navigator.pop(context);
-//       showDialog(context: context, builder: (context) => AlertDialog(
-//           title: Text('Error'),
-//           content: Text(e.message!),
-//           actions: [
-//             TextButton(onPressed: () => Navigator.pop(context), child: Text('Ok'))
-//           ],) );
-//    }
-
-// }
-
-  static Future<String> getUID() async{
     final _auth = FirebaseAuth.instance;
-    final _user = _auth.currentUser;
-    return _user!.uid;
-  }
+    showDialog(context: context, builder: (context) => BlobLoader('Signing in...'),);
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+if(FirebaseAuth.instance.currentUser!=null){
+               String uid = FirebaseAuth.instance.currentUser!.uid;
+      LocalUser mUser = await Database.getUser(uid);
+      Provider.of<UserProvider>(context, listen: false).setUser(mUser);
+            
+      Navigator.pop(context);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+      }
+
+    }
+     on FirebaseAuthException catch (e){
+      Navigator.pop(context);
+      showDialog(context: context, builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text(e.message!),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: Text('Ok'))
+          ],) );
+   }
+
+}
+
 
   static Future<void> signOut(){
     final _auth = FirebaseAuth.instance;

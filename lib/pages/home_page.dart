@@ -1,10 +1,19 @@
 import 'dart:ui';
-
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:provider/provider.dart';
+import 'package:spaza/firebase/database/items_database.dart';
+import 'package:spaza/models/item.dart';
+import 'package:spaza/pages/cart_page.dart';
+import 'package:spaza/providers/cart_provider.dart';
+import 'package:spaza/providers/userProvider.dart';
+import 'package:spaza/sheets/add_item_sheet.dart';
+import 'package:spaza/widgets/drawer.dart';
 import 'package:spaza/widgets/homeUserWidget.dart';
+import 'package:spaza/widgets/item_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,15 +24,14 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState  extends State<HomePage> {
-
+class _HomeScreenState extends State<HomePage> {
   double _blur = 0;
   bool isFabExpanded = true;
   final ScrollController _scrollController = ScrollController();
   List<String> messages = [
     'Welcome to Lucky\'s Spaza 😁',
-    'Get the best deals on your favourite snacks',
-    'Enjoy the best snacks in town',
+    'Get the best deals on best food',
+    'Enjoy the best food in town',
     'I don\'t know what else to add😴',
   ];
 
@@ -35,7 +43,6 @@ class _HomeScreenState  extends State<HomePage> {
         _blur = 10;
         color = Colors.white;
         isFabExpanded = false;
-
       });
     } else {
       setState(() {
@@ -46,13 +53,22 @@ class _HomeScreenState  extends State<HomePage> {
     }
   }
 
+  Future<List<Item>> itemsFuture = ItemDatabase.getItems();
+
+  bool isLoading = false;
+
+  void refresh() {
+    print("refreshing");
+    setState(() {
+      itemsFuture = ItemDatabase.getItems();
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    //userProvider = Provider.of<UserProvider>(context, listen: false);
     _scrollController.addListener(() {
-      //print('position: ${_scrollController.position.extentBefore}');
       handleScroll(_scrollController.position.extentBefore);
     });
   }
@@ -67,63 +83,94 @@ class _HomeScreenState  extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const DrawerWidget(),
       floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
       extendBodyBehindAppBar: true,
       extendBody: true,
-      floatingActionButton: FloatingActionButton.extended(
-        extendedPadding: const EdgeInsets.all(18),
-        enableFeedback: true,
-        isExtended: isFabExpanded,
-        heroTag: 'fab',
-        icon:const  Icon(Icons.question_answer_rounded, color: Colors.white,),
-        backgroundColor: Colors.lightBlueAccent,
-        elevation: 5,
-        onPressed: () {
-
-          //_postQuestion(context);
-
-        },
-        label: Text('Get support' , style: GoogleFonts.abel(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),),
-
-      ),
+      floatingActionButton: Provider.of<UserProvider>(context).user!.isAdmin
+          ? FloatingActionButton.extended(
+              extendedPadding: const EdgeInsets.all(18),
+              enableFeedback: true,
+              isExtended: isFabExpanded,
+              heroTag: 'fab',
+              icon: const Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+              ),
+              backgroundColor: Colors.lightBlueAccent,
+              elevation: 5,
+              onPressed: () {
+                postItem(context);
+              },
+              label: Text(
+                'Add Items',
+                style: GoogleFonts.abel(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            )
+          : null,
       //drawer: DrawerWidget(),
-      body:CustomScrollView(
+      body: LiquidPullToRefresh(
+        height: MediaQuery.of(context).size.height * 0.3,
+        animSpeedFactor: 5,
+        springAnimationDurationInMilliseconds: 1000,
+        onRefresh: () async {
+          setState(() {
+            itemsFuture = ItemDatabase.getItems();
+          });
+          await Future.delayed(const Duration(seconds: 1));
+        },
+        child: CustomScrollView(
           controller: _scrollController,
           slivers: [
             SliverAppBar(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.2),
+              backgroundColor:
+                  Theme.of(context).scaffoldBackgroundColor.withOpacity(0.2),
               pinned: true,
-              title:AnimatedTextKit(
+              title: AnimatedTextKit(
                 repeatForever: true,
                 pause: const Duration(seconds: 5),
-                animatedTexts: messages.map((e) => TypewriterAnimatedText(
-                  e,
-                  textStyle: GoogleFonts.roboto(
-                      fontSize: 14, color: Colors.blueGrey),
-                  speed: const Duration(milliseconds: 100),
-                )).toList(
-                ),
+                animatedTexts: messages
+                    .map((e) => TypewriterAnimatedText(
+                          e,
+                          textStyle: GoogleFonts.roboto(
+                              fontSize: 14, color: Colors.blueGrey),
+                          speed: const Duration(milliseconds: 100),
+                        ))
+                    .toList(),
               ),
               leading: Builder(
                 builder: (context) => IconButton(
-                  icon:
-                  const FaIcon(
+                  icon: const FaIcon(
                     FontAwesomeIcons.bars,
                     color: Colors.lightBlue,
                   ),
                   onPressed: () => Scaffold.of(context).openDrawer(),
-                ),),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    //showSearch(context: context, delegate: QuestionSearchDelegate());
-                  },
-                  icon: const Icon(
-                    //FontAwesomeIcons.magnifyingGlass,
-                    Icons.shopping_cart,
-                    color: Colors.blueGrey,
-                  ),
                 ),
+              ),
+              actions: [
+                if (!Provider.of<UserProvider>(context).user!.isAdmin)
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => CartPage()));
+                    },
+                    icon: Badge(
+                      isLabelVisible:
+                          Provider.of<CartProvider>(context).totalItems > 0,
+                      label: Text(
+                        '${Provider.of<CartProvider>(context).totalItems}',
+                        style: GoogleFonts.abel(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      child: const Icon(
+                        FontAwesomeIcons.cartShopping,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ),
               ],
               centerTitle: true,
               expandedHeight: 80 + 60,
@@ -133,66 +180,62 @@ class _HomeScreenState  extends State<HomePage> {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: _blur, sigmaY: _blur),
                     child: FlexibleSpaceBar(
-                  background: HomeUserWidget(),
-
+                      background: HomeUserWidget(),
                     ),
                   ),
                 ),
               ),
             ),
-            // FutureBuilder(builder: (context, snapshot) {
-            //   if (snapshot.hasData) {
-            //     return SliverList(
-            //       delegate: SliverChildBuilderDelegate(
-            //         addAutomaticKeepAlives: true,
-            //             (context, index) {
-            //           return QuestionWidget(
-            //             question: snapshot.data![index],
-            //           );
-            //         },
-            //         childCount: snapshot.data!.length,
-            //       ),
-            //     );
-            //   } else {
-            //     return SliverFillRemaining(
-            //       child: Center(
-            //         child: CircularProgressIndicator.adaptive(),
-            //       ),
-            //     );
-            //   }
-            // },
-              //future: Provider.of<QuestionsProvider>(context).allQuestions,
-           SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-                    height: 200,
-                    decoration: BoxDecoration(
-                      //color: Colors.lightBlueAccent.withOpacity(0.8),
-                      color:Colors.lightBlueAccent,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          spreadRadius: 2,
-                          blurRadius: 10,
-                          offset: const Offset(0, 3), // changes position of shadow
-                        ),
-                      ],
-                    ),
-                    child:Center(
-                      child: Text('$index'),
+            FutureBuilder(
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      addAutomaticKeepAlives: true,
+                      (context, index) {
+                        return ItemWidget(
+                          item: snapshot.data![index],
+                          onRemove: refresh,
+                        );
+                      },
+                      childCount: snapshot.data!.length,
                     ),
                   );
-                }, childCount: 300),
-
+                } else {
+                  return const SliverFillRemaining(
+                    child: Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    ),
+                  );
+                }
+              },
+              future: itemsFuture,
             ),
-
           ],
         ),
-
-
+      ),
     );
   }
 
+  void postItem(BuildContext context) {
+    showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        context: context,
+        builder: (context) => DraggableScrollableSheet(
+              snap: true,
+              snapSizes: const [
+                0.8,
+              ],
+              initialChildSize: 0.90,
+              builder: (context, scrollController) {
+                return SafeArea(
+                    bottom: false,
+                    child: PostItemSheet(
+                      myController: scrollController,
+                      callback: refresh,
+                    ));
+              },
+            ));
+  }
 }

@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../extensions/colorExtension.dart';
 
-class LoginButton extends StatelessWidget{
-  const LoginButton({Key? key, required this.onPressed, required this.text}) : super(key: key);
+class LoginButton extends StatelessWidget {
+  const LoginButton({Key? key, required this.onPressed, required this.text})
+      : super(key: key);
 
   final VoidCallback onPressed;
   final String text;
 
   @override
-  Widget build(BuildContext context){
-    return   GestureDetector(
+  Widget build(BuildContext context) {
+    return GestureDetector(
       onTap: () {
         onPressed();
       },
@@ -27,31 +28,28 @@ class LoginButton extends StatelessWidget{
             boxShadow: [
               (MediaQuery.of(context).platformBrightness == Brightness.light)
                   ? BoxShadow(
-                color: Colors.lightBlueAccent.withOpacity(0.5),
-                spreadRadius: 3,
-                blurRadius: 7,
-                offset:
-                const Offset(0, 3), // changes position of shadow
-              )
+                      color: Colors.lightBlueAccent.withOpacity(0.5),
+                      spreadRadius: 3,
+                      blurRadius: 7,
+                      offset: const Offset(0, 3), // changes position of shadow
+                    )
                   : BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset:
-                const Offset(0, 3), // changes position of shadow
-              ),
+                      color: Colors.black.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3), // changes position of shadow
+                    ),
             ],
           ),
           margin: const EdgeInsets.all(10),
           child: Text(
-            'Login',
-            style: TextStyle(
+            text,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           )),
     );
-
   }
 }

@@ -13,8 +13,8 @@ class Database{
 
    //show loading dialog
    showDialog(context: context, builder: (context) => AlertDialog(
-     title: Text('Loading'),
-     content: Text('Please wait while we set everything up for you'),
+     title: const Text('Loading'),
+     content:const  Text('Please wait while we set everything up for you'),
      actions: [
        TextButton(onPressed: () => Navigator.pop(context), child: Text('Ok'))
      ],));

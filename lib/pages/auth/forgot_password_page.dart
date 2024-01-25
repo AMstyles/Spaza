@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:spaza/widgets/login_button.dart';
@@ -14,13 +13,12 @@ class ForgotPasswordPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         extendBodyBehindAppBar: true,
-        appBar:
-        AppBar(
+        appBar: AppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
           title: Text(
-            'Forgot Password',
+            'Reset Password',
             style: GoogleFonts.abel(fontSize: 30, fontWeight: FontWeight.bold),
           ),
           leading: Container(
@@ -29,66 +27,61 @@ class ForgotPasswordPage extends StatelessWidget {
               shape: BoxShape.circle,
               color: Colors.white,
             ),
-
-            child:IconButton(
+            child: IconButton(
               icon: const Icon(Icons.arrow_back_ios),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
-
           ),
         ),
-
-
-        body: Form(child:ListView(
-              children: [
-                SizedBox(
+        body: Form(
+          child: ListView(
+            children: [
+              SizedBox(
                   height: 330,
-                  child:Image.asset('lib/illustrations/forgot_password.png')),
-
-                Padding(padding: const EdgeInsets.all(10),
-                  child: Text('Reset Password', style: GoogleFonts.abel(fontSize: 30, fontWeight: FontWeight.bold),),),
-
-                Text('Please enter your email address to reset your password', style: GoogleFonts.abel(fontSize: 15,color: Colors.blueGrey ),),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  child: TextFormField(
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.done,
-                    onEditingComplete: () {
-
-                      _emailFieldKey.currentState!.validate();
-                      FocusScope.of(context).nextFocus();
-                    },
-                    key: _emailFieldKey,
-                    onChanged: (value) {
-                        _emailController.text = value;
-                    },
-
-                    decoration: const InputDecoration(
-                      focusColor: Colors.amber,
-                      hoverColor: Colors.amber,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      labelText: 'Email',
+                  child: Image.asset('lib/images/forgort_password.png')),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Please enter your email address to reset your password',
+                  style: GoogleFonts.abel(fontSize: 15, color: Colors.blueGrey),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.all(10),
+                child: TextFormField(
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
+                  onEditingComplete: () {
+                    _emailFieldKey.currentState!.validate();
+                    FocusScope.of(context).nextFocus();
+                  },
+                  key: _emailFieldKey,
+                  onChanged: (value) {
+                    _emailController.text = value;
+                  },
+                  decoration: const InputDecoration(
+                    focusColor: Colors.amber,
+                    hoverColor: Colors.amber,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
-                    validator: (value) {
-                      if (value == null ||
-                          value.isEmpty ||
-                          !value.contains('@')) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    },
-                  ),),
-
-                LoginButton(onPressed: (){}, text: "Reset Password"),
-              ],
-            ),
-            )
-
-    );
+                    labelText: 'Email',
+                  ),
+                  validator: (value) {
+                    if (value == null ||
+                        value.isEmpty ||
+                        !value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              LoginButton(onPressed: () {}, text: "Reset"),
+            ],
+          ),
+        ));
   }
 }
